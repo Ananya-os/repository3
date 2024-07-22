@@ -1,0 +1,159 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+
+public class LibraryManagementSystem {
+    private static List<Book> books = new ArrayList<>();
+    
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Library Management System");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(600, 400);
+        frame.setLayout(new BorderLayout());
+        
+        // Create the tabs
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Add tab for adding books
+        JPanel addBookPanel = new JPanel(new GridLayout(5, 2));
+        JTextField addTitleField = new JTextField();
+        JTextField addAuthorField = new JTextField();
+        JTextField addYearField = new JTextField();
+        JTextField addISBNField = new JTextField();
+        JButton addButton = new JButton("Add Book");
+
+        addBookPanel.add(new JLabel("Title:"));
+        addBookPanel.add(addTitleField);
+        addBookPanel.add(new JLabel("Author:"));
+        addBookPanel.add(addAuthorField);
+        addBookPanel.add(new JLabel("Year:"));
+        addBookPanel.add(addYearField);
+        addBookPanel.add(new JLabel("ISBN:"));
+        addBookPanel.add(addISBNField);
+        addBookPanel.add(new JLabel());
+        addBookPanel.add(addButton);
+
+        tabbedPane.add("Add Book", addBookPanel);
+
+        // Add tab for viewing books
+        JPanel viewBooksPanel = new JPanel(new BorderLayout());
+        JTextArea viewBooksArea = new JTextArea();
+        viewBooksArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(viewBooksArea);
+        JButton viewButton = new JButton("View All Books");
+
+        viewBooksPanel.add(scrollPane, BorderLayout.CENTER);
+        viewBooksPanel.add(viewButton, BorderLayout.SOUTH);
+
+        tabbedPane.add("View Books", viewBooksPanel);
+
+        // Add tab for deleting books
+        JPanel deleteBookPanel = new JPanel(new GridLayout(2, 2));
+        JTextField deleteISBNField = new JTextField();
+        JButton deleteButton = new JButton("Delete Book");
+
+        deleteBookPanel.add(new JLabel("ISBN to Delete:"));
+        deleteBookPanel.add(deleteISBNField);
+        deleteBookPanel.add(new JLabel());
+        deleteBookPanel.add(deleteButton);
+
+        tabbedPane.add("Delete Book", deleteBookPanel);
+
+        // Add tab for searching books
+        JPanel searchBookPanel = new JPanel(new GridLayout(2, 2));
+        JTextField searchISBNField = new JTextField();
+        JTextArea searchResultArea = new JTextArea();
+        searchResultArea.setEditable(false);
+        JButton searchButton = new JButton("Search Book");
+
+        searchBookPanel.add(new JLabel("ISBN to Search:"));
+        searchBookPanel.add(searchISBNField);
+        searchBookPanel.add(new JLabel());
+        searchBookPanel.add(searchButton);
+
+        JPanel searchPanel = new JPanel(new BorderLayout());
+        searchPanel.add(searchBookPanel, BorderLayout.NORTH);
+        searchPanel.add(new JScrollPane(searchResultArea), BorderLayout.CENTER);
+
+        tabbedPane.add("Search Book", searchPanel);
+
+        // Action Listeners
+        addButton.addActionListener(e -> {
+            String title = addTitleField.getText();
+            String author = addAuthorField.getText();
+            String year = addYearField.getText();
+            String isbn = addISBNField.getText();
+
+            if (title.isEmpty() || author.isEmpty() || year.isEmpty() || isbn.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "All fields are required.");
+            } else {
+                books.add(new Book(title, author, Integer.parseInt(year), isbn));
+                JOptionPane.showMessageDialog(frame, "Book added successfully!");
+                addTitleField.setText("");
+                addAuthorField.setText("");
+                addYearField.setText("");
+                addISBNField.setText("");
+            }
+        });
+
+        viewButton.addActionListener(e -> {
+            StringBuilder sb = new StringBuilder();
+            for (Book book : books) {
+                sb.append(book).append("\n");
+            }
+            viewBooksArea.setText(sb.toString());
+        });
+
+        deleteButton.addActionListener(e -> {
+            String isbn = deleteISBNField.getText();
+            books.removeIf(book -> book.getIsbn().equals(isbn));
+            JOptionPane.showMessageDialog(frame, "Book deleted (if it existed).");
+            deleteISBNField.setText("");
+        });
+
+        searchButton.addActionListener(e -> {
+            String isbn = searchISBNField.getText();
+            StringBuilder sb = new StringBuilder();
+            for (Book book : books) {
+                if (book.getIsbn().equals(isbn)) {
+                    sb.append(book);
+                }
+            }
+            if (sb.length() == 0) {
+                sb.append("No book found with ISBN ").append(isbn);
+            }
+            searchResultArea.setText(sb.toString());
+            searchISBNField.setText("");
+        });
+
+        frame.add(tabbedPane);
+        frame.setVisible(true);
+    }
+
+    // Book class
+    static class Book {
+        private String title;
+        private String author;
+        private int year;
+        private String isbn;
+
+        public Book(String title, String author, int year, String isbn) {
+            this.title = title;
+            this.author = author;
+            this.year = year;
+            this.isbn = isbn;
+        }
+
+        public String getIsbn() {
+            return isbn;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("Title: %s\nAuthor: %s\nYear: %d\nISBN: %s\n", title, author, year, isbn);
+        }
+    }
+}
